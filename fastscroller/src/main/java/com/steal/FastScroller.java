@@ -123,7 +123,7 @@ public class FastScroller extends View {
         }
 
         // debug
-        if (debug && BuildConfig.DEBUG) {
+        if (debug) { // BuildConfig.DEBUG cannot use another project
             debugPaint = new Paint();
             debugPaint.setColor(Color.RED);
             debugPaint.setStrokeWidth((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, context.getResources().getDisplayMetrics()));
@@ -337,36 +337,27 @@ public class FastScroller extends View {
             case MotionEvent.ACTION_DOWN:
                 downY = y;
                 touchState = TOUCH_DOWN;
-                break;
-
             case MotionEvent.ACTION_MOVE:
-                if (touchState == TOUCH_DOWN) {
-                    if (Math.abs(downY - y) > touchSlop) {
-                        touchState = TOUCH_SCROLL;
-                    }
-                } else {
-                    float halfSpacing = measuredSpacing / 2;
-                    float groupHeight = measuredSectionHeight + measuredSpacing;
+                float halfSpacing = measuredSpacing / 2;
+                float groupHeight = measuredSectionHeight + measuredSpacing;
 
-                    y = (int) Math.min(Math.max(y - getPaddingTop(), halfSpacing), sectionLength * groupHeight - halfSpacing);
+                y = (int) Math.min(Math.max(y - getPaddingTop(), halfSpacing), sectionLength * groupHeight - halfSpacing);
 
-                    int index = (int) Math.floor(y / groupHeight);
+                int index = (int) Math.floor(y / groupHeight);
 
-                    if (index == sectionIndex) {
-                        break;
-                    }
+                if (index == sectionIndex) {
+                    break;
+                }
 
-                    y -= index * groupHeight;
+                y -= index * groupHeight;
 
-                    if (halfSpacing <= y && y <= groupHeight - halfSpacing) {
-                        sectionIndex = index;
-                        onSectionChanged(index);
-                        raiseOnSectionScrolledListener(index);
-                        invalidate();
-                    }
+                if (halfSpacing <= y && y <= groupHeight - halfSpacing) {
+                    sectionIndex = index;
+                    onSectionChanged(index);
+                    raiseOnSectionScrolledListener(index);
+                    invalidate();
                 }
                 break;
-
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 touchState = TOUCH_IDLE;
